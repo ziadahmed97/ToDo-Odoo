@@ -1,0 +1,37 @@
+<odoo>
+    <record id="note_view_tree" model="ir.ui.view">
+            <field name="name">assignedTo tree</field>
+            <field name="model">assignedto</field>
+            <field name="arch" type="xml">
+                <list multi_edit="True">
+                    <field name="name"/>
+                    <field name="to_do_ids" widget="many2many_tags"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="note_form_view" model="ir.ui.view">
+            <field name="name">assignedTo form</field>
+            <field name="model">assignedto</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="to_do_ids"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record >
+    <record id="assigned_to_action" model="ir.actions.act_window">
+        <field name="name">Note taker</field>
+        <field name="res_model">assignedto</field>
+    </record>
+    <menuitem
+         id="assigned_to_ment_item"
+         name = "note takers"
+         parent="menu_todo_root"
+         action = "assigned_to_action"
+    />
+</odoo>

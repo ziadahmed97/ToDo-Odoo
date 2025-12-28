@@ -1,0 +1,118 @@
+<odoo>
+        <record id="tasklist_view_tree" model="ir.ui.view">
+            <field name="name">todo tree</field>
+            <field name="model">todo</field>
+            <field name="arch" type="xml">
+                <list decoration-danger="(is_late)">
+                    <field name="task_name"/>
+                    <field name="assigned_to_id"/>
+                    <field name="description"/>
+                    <field name="due_date"/>
+                    <field name="status"/>
+                    <field name="active" invisible="1"/>
+                    <field name="is_late" invisible="1"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="tasklist_form_view" model="ir.ui.view">
+            <field name="name">todo form</field>
+            <field name="model">todo</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <header>
+                            <button name="get_todo_from_external_app" type="object" class="btn-primary" string="get tasks"/>
+                            <button name="close_state_action" type="object" class="btn-primary" string="close" invisible="status == 'close' "/>
+                            <button name="action_new" type="object" class="btn-primary" string="set to new" invisible="status in ('new','close') "/>
+                            <button name="action_in_progress" type="object" class="btn-primary" string="set to in_progress " invisible="status != 'new'"/>
+                            <button name="action_completed" type="object" class="btn-primary" string="set to completed" invisible="status != 'in_progress'"/>
+                            <field name="status" widget="statusbar" options="{'clickable':0}"/>
+<!--                        statusbar_visible="draft,sold"-->
+                    </header>
+                        <group >
+                            <field name="ref" readonly="1"/>
+                            <field name="task_name" readonly="status in ('completed','close')"/>
+                            <field name="assigned_to_id" readonly="status in ('completed','close')"/>
+                            <field name="description" readonly="status in ('completed','close')"/>
+                            <field name="due_date" readonly="status in ('completed','close')"/>
+                            <field name="status" readonly="status in ('completed','close')"/>
+                            <field name="estimated_time" readonly="status in ('completed','close')"/>
+                            <field name="active" readonly="status in ('completed','close')"/>
+                        </group>
+                        <notebook>
+                        <page string="Timesheet">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="date" />
+                                    <field name="description" />
+                                    <field name="time" string="Estimated Time"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                    </sheet>
+                    <chatter class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </chatter>
+                </form>
+            </field>
+        </record >
+        <record id="tasklist_search_view" model="ir.ui.view">
+            <field name="name">todo search view</field>
+            <field name="model">todo</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="task_name"/>
+                    <field name="assigned_to"/>
+                    <filter name="filter_new" string="New" domain="[('status','=','new')]"/>
+                    <filter name="filter_in_progress" string="In Progress" domain="[('status','=','in_progress')]"/>
+                    <filter name="filter_completed" string="Completed" domain="[('status','=','completed')]"/>
+
+                    <filter name="group_assign" string="Assigned To" context="{'group_by':'assigned_to'}"/>
+                    <filter name="group_status" string="Status" context="{'group_by':'status'}"/>
+                    <filter name="group_due" string="Due Date" context="{'group_by':'due_date'}"/>
+
+                </search>
+            </field>
+        </record>
+        <record id="taskList_actions" model="ir.actions.act_window">
+            <field name="name">Todo Tasks</field>
+            <field name="res_model">todo</field>
+            <field name="view_mode">list,form</field>
+        </record>
+        <record id="close_status_actions" model="ir.actions.server">
+            <field name="name">Close</field>
+            <field name="model_id" ref="model_todo"/>
+            <field name="state">code</field>
+            <field name="code">
+                action = close_state_action()
+            </field>
+        </record>
+        <record id="due_date_alert_action" model="ir.cron">
+            <field name="name">Close</field>
+            <field name="model_id" ref="model_todo"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+            <field name="state">code</field>
+            <field name="code">
+                model.due_date_exceeded_action()
+            </field>
+            <field name="active">True</field>
+        </record>
+    <record id="task_assign_wizard_action" model="ir.actions.server">
+        <field name="name">Task Assigning Action</field>
+    <field name="model_id" ref="model_todo"/>
+        <field name="binding_model_id" ref="model_todo"/>
+    <field name="state">code</field>
+    <field name="code">
+        action = records.action_open_task_assign_wizard()
+    </field>
+    </record>
+
+        <menuitem id="menu_todo_root" name="Todo"/>
+        <menuitem id="menu_todo_task" name="Tasks" parent="menu_todo_root" action="taskList_actions"/>
+
+</odoo>
